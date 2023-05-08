@@ -59,6 +59,34 @@ if ans == 'n':
     login()
 elif ans == 'y':
     signup()
+    
+data = {"Age": 21, "Name": "Jenna", "Employed": True}
+#-------------------------------------------------------------------------------
+# Create Data
+
+db.push(data)
+db.child("Users").child("FirstPerson").set(data)
+
+#-------------------------------------------------------------------------------
+# Read Data
+
+jenna = db.child("Users").child("FirstPerson").get()
+print(jenna.val())
+#-------------------------------------------------------------------------------
+# Update Data
+
+db.child("Users").child("FirstPerson").update({"Name": "Larry"})
+
+#-------------------------------------------------------------------------------
+# Remove Data
+
+#Delete 1 Value
+db.child("Users").child("FirstPerson").child("Age").remove()
+
+# Delete whole Node
+db.child("Users").child("FirstPerson").remove()
+
+#-------------------------------------------------------------------------------
 # #connects to the firebase
 # database = firebase.database()
 # #configs the database
