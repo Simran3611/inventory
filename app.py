@@ -1,100 +1,85 @@
-import pyrebase
-# from firebase import firebase
+import mysql.connector
 
-#steps to install pyrebase 
-#pip3 install --upgrade setuptools
+# Connect to the database
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="temp"
+)
 
-# pip3 install --upgrade gcloud
+mycursor = db.cursor()
 
-# pip3 install pyrebase4
-#  
-firebaseConfig =  {
-  "apiKey": "AIzaSyDlVlhetavbdVX4EBIzBPrHji0uT3fIBeA",
-  "authDomain": "inventorydb-b0cee.firebaseapp.com",
-  "projectId": "inventorydb-b0cee",
-  "databaseURL": "https://inventorydb-b0cee-default-rtdb.firebaseio.com/",
-  "storageBucket": "inventorydb-b0cee.appspot.com",
-  "messagingSenderId": "155467399195",
-  "appId": "1:155467399195:web:beae9ee6f69197d14bb8be",
-  "measurementId": "G-VHXND08TDE"
-  }
+# Execute the CREATE TABLE query
+mycursor.execute("CREATE TABLE IF NOT EXISTS Inventory ("
+                 "id INT AUTO_INCREMENT PRIMARY KEY,"
+                 "item VARCHAR(30) NOT NULL,"
+                 "description VARCHAR(300) NOT NULL,"
+                 "price DECIMAL(8,2) NOT NULL,"
+                 "quantity INT(140) NOT NULL"
+                 ")")
 
-firebase = pyrebase.initialize_app(firebaseConfig)
-auth=firebase.auth()
+answer = input("What would you like to do (insert, delete, update, retrieve): ")
 
-def login():
-    print("Log in...")
-    email=input("Enter email: ")
-    password=input("Enter password: ")
-    try:
-        login = auth.sign_in_with_email_and_password(email, password)
-        print("Successfully logged in!")
-        # print(auth.get_account_info(login['idToken']))
-       # email = auth.get_account_info(login['idToken'])['users'][0]['email']
-       # print(email)
-    except:
-        print("Invalid email or password")
-    return
+if answer == "insert":
+    # Get the item details from the user
+    item = input("Enter item name: ")
+    description = input("Enter item description: ")
+    price = input("Enter item price: ")
+    quantity = input("Enter item quantity: ")
 
-#Signup Function
+    # Check if the item already exists in the table
+    mycursor.execute("SELECT * FROM Inventory")
+    result = mycursor.fetchall()
+    for row in result:
+        if row[1] == item:
+            print("Item already exists")
+            break
+    else:
+        # Add the item to the table
+        mycursor.execute("INSERT INTO Inventory (item, description, price, quantity) VALUES (%s, %s, %s, %s)",
+                          (item, description, price, quantity))
+        db.commit()
+        print("Item added successfully")
 
-def signup():
-    print("Sign up...")
-    email = input("Enter email: ")
-    password=input("Enter password: ")
-    try:
-        user = auth.create_user_with_email_and_password(email, password)
-        ask=input("Do you want to login?[y/n]")
-        if ask=='y':
-            login()
-    except: 
-        print("Email already exists")
-    return
+elif answer == "retrieve":
+    # Display the contents of the Inventory table
+    mycursor.execute("SELECT * FROM Inventory")
+    for x in mycursor:
+        print(x)
 
-#Main
+elif answer == "update":
+    # Get the item details from the user
+    itemID = input("Enter item id: ")
+    mycursor.execute("SELECT * FROM Inventory WHERE id = %s", (itemID,))
+    result = mycursor.fetchall()
+    if len(result) == 0:
+        print("Item does not exist")
+    else:
+        item = input("Enter item name: ")
+        description = input("Enter item description: ")
+        price = input("Enter item price: ")
+        quantity = input("Enter item quantity: ")
+        mycursor.execute("UPDATE Inventory SET item = %s, description = %s, price = %s, quantity = %s WHERE id = %s",
+                          (item, description, price, quantity, itemID))
+        db.commit()
+        print("Item updated successfully")
 
-ans=input("Are you a new user?[y/n]")
+elif answer == "delete":
+    # Get the item details from the user
+    itemID = input("Enter item id: ")
+    mycursor.execute("SELECT * FROM Inventory WHERE id = %s", (itemID,))
+    result = mycursor.fetchall()
+    if len(result) == 0:
+        print("Item does not exist")
+    else:
+        mycursor.execute("DELETE FROM Inventory WHERE id = %s", (itemID,))
+        db.commit()
+        print("Item deleted successfully")
 
-if ans == 'n':
-    login()
-elif ans == 'y':
-    signup()
-    
-data = {"Age": 21, "Name": "Jenna", "Employed": True}
-#-------------------------------------------------------------------------------
-# Create Data
+else:
+    print("Invalid input")
 
-db.push(data)
-db.child("Users").child("FirstPerson").set(data)
-
-#-------------------------------------------------------------------------------
-# Read Data
-
-jenna = db.child("Users").child("FirstPerson").get()
-print(jenna.val())
-#-------------------------------------------------------------------------------
-# Update Data
-
-db.child("Users").child("FirstPerson").update({"Name": "Larry"})
-
-#-------------------------------------------------------------------------------
-# Remove Data
-
-#Delete 1 Value
-db.child("Users").child("FirstPerson").child("Age").remove()
-
-# Delete whole Node
-db.child("Users").child("FirstPerson").remove()
-
-#-------------------------------------------------------------------------------
-# #connects to the firebase
-# database = firebase.database()
-# #configs the database
-
-# data = {"Age": 21, "Name": "Jenna", "Employed": True}
-# #-------------------------------------------------------------------------------
-# # Creates data, go ahead and change the data to related data to inventory
-
-# database.push(data)
-# database.child("Users").child("FirstPerson").set(data)
-# #pushes the data to the database
+# Close the cursor and database connection
+mycursor.close()
+db.close()
