@@ -60,8 +60,21 @@ elif answer == "update":
         description = input("Enter item description: ")
         price = input("Enter item price: ")
         quantity = input("Enter item quantity: ")
-        mycursor.execute("UPDATE Inventory SET item = %s, description = %s, price = %s, quantity = %s WHERE id = %s",
-                          (item, description, price, quantity, itemID))
+        column = input("Enter column to update (item, description, price, quantity): ")
+        if column == "item":
+            mycursor.execute("UPDATE Inventory SET item = %s WHERE id = %s",
+                              (item, itemID))
+        elif column == "description":
+            mycursor.execute("UPDATE Inventory SET description = %s WHERE id = %s",
+                              (description, itemID))
+        elif column == "price":
+            mycursor.execute("UPDATE Inventory SET price = %s WHERE id = %s",
+                              (price, itemID))
+        elif column == "quantity":
+            mycursor.execute("UPDATE Inventory SET quantity = %s WHERE id = %s",
+                              (quantity, itemID))
+        else:
+            print("Invalid column")
         db.commit()
         print("Item updated successfully")
 
