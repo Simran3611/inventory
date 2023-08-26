@@ -1,98 +1,47 @@
-import mysql.connector
+import inventory
+from tabulate import tabulate
+#import libraries
 
-# Connect to the database
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="temp"
-)
-
-mycursor = db.cursor()
-
-# Execute the CREATE TABLE query
-mycursor.execute("CREATE TABLE IF NOT EXISTS Inventory ("
-                 "id INT AUTO_INCREMENT PRIMARY KEY,"
-                 "item VARCHAR(30) NOT NULL,"
-                 "description VARCHAR(300) NOT NULL,"
-                 "price DECIMAL(8,2) NOT NULL,"
-                 "quantity INT(140) NOT NULL"
-                 ")")
-
-answer = input("What would you like to do (insert, delete, update, retrieve): ")
+    
+answer = input("What would you like to do (insert, delete, update, retrieve, search): ")
 
 if answer == "insert":
-    # Get the item details from the user
-    item = input("Enter item name: ")
-    description = input("Enter item description: ")
-    price = input("Enter item price: ")
-    quantity = input("Enter item quantity: ")
-
-    # Check if the item already exists in the table
-    mycursor.execute("SELECT * FROM Inventory")
-    result = mycursor.fetchall()
-    for row in result:
-        if row[1] == item:
-            print("Item already exists")
-            break
-    else:
-        # Add the item to the table
-        mycursor.execute("INSERT INTO Inventory (item, description, price, quantity) VALUES (%s, %s, %s, %s)",
-                          (item, description, price, quantity))
-        db.commit()
-        print("Item added successfully")
+    # item = input("Enter item name: ")
+    # description = input("Enter item description: ")
+    # price = input("Enter item price: ")
+    # quantity = input("Enter item quantity: ")
+    # inventory.insert_items(item, description, price, quantity)
+    inventory.read_barcode()
 
 elif answer == "retrieve":
-    # Display the contents of the Inventory table
-    mycursor.execute("SELECT * FROM Inventory")
-    for x in mycursor:
-        print(x)
+    inventory.retrieve_items()
+    # headers = ["ID", "Item", "Description", "Price", "Quantity"]
+    # table = tabulate(items, headers, tablefmt="grid")
+    # print(table)
 
 elif answer == "update":
-    # Get the item details from the user
+    updateWhat = input("What would you like to update (item, description, price, quantity): ")
     itemID = input("Enter item id: ")
-    mycursor.execute("SELECT * FROM Inventory WHERE id = %s", (itemID,))
-    result = mycursor.fetchall()
-    if len(result) == 0:
-        print("Item does not exist")
-    else:
+    if updateWhat == 'item':
         item = input("Enter item name: ")
+        inventory.update_items(itemID, item)
+    elif updateWhat == 'description':
         description = input("Enter item description: ")
+        inventory.update_items(itemID, description)
+    elif updateWhat == 'price':
         price = input("Enter item price: ")
+        inventory.update_items(itemID, price)
+    elif updateWhat == 'quantity':
         quantity = input("Enter item quantity: ")
-        column = input("Enter column to update (item, description, price, quantity): ")
-        if column == "item":
-            mycursor.execute("UPDATE Inventory SET item = %s WHERE id = %s",
-                              (item, itemID))
-        elif column == "description":
-            mycursor.execute("UPDATE Inventory SET description = %s WHERE id = %s",
-                              (description, itemID))
-        elif column == "price":
-            mycursor.execute("UPDATE Inventory SET price = %s WHERE id = %s",
-                              (price, itemID))
-        elif column == "quantity":
-            mycursor.execute("UPDATE Inventory SET quantity = %s WHERE id = %s",
-                              (quantity, itemID))
-        else:
-            print("Invalid column")
-        db.commit()
-        print("Item updated successfully")
+        inventory.update_items(itemID, quantity)
+    else:   
+        print("Invalid option.")
 
 elif answer == "delete":
-    # Get the item details from the user
     itemID = input("Enter item id: ")
-    mycursor.execute("SELECT * FROM Inventory WHERE id = %s", (itemID,))
-    result = mycursor.fetchall()
-    if len(result) == 0:
-        print("Item does not exist")
-    else:
-        mycursor.execute("DELETE FROM Inventory WHERE id = %s", (itemID,))
-        db.commit()
-        print("Item deleted successfully")
+    inventory.delete_items(itemID)
 
-else:
-    print("Invalid input")
-
-# Close the cursor and database connection
-mycursor.close()
-db.close()
+elif answer == "search":
+    item = input("Enter item name: ")
+    inventory.search_items(item)
+    # print(table)
