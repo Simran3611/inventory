@@ -6,6 +6,7 @@ from tabulate import tabulate
 answer = input("What would you like to do (insert, delete, update, retrieve, search): ")
 
 if answer == "insert":
+    #delete this after!!!!
     # item = input("Enter item name: ")
     # description = input("Enter item description: ")
     # price = input("Enter item price: ")
