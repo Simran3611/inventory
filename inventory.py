@@ -37,6 +37,7 @@ def read_barcode():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+#once insert works, modify according to the task
 #delete this after!!! or modify
 # def read_barcode():
 #     try:
