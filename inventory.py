@@ -36,7 +36,8 @@ def read_barcode():
         print("Barcode scanning stopped.")
     except Exception as e:
         print(f"An error occurred: {e}")
- 
+
+#delete this after!!! or modify
 # def read_barcode():
 #     try:
 #         while True:
